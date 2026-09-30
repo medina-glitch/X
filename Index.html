@@ -1,0 +1,544 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustituir Párrafos entre Documentos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 750px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 50px 40px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #6b4c9a, #a855f7);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+            box-shadow: 0 10px 30px rgba(107, 76, 154, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 10px 30px rgba(107, 76, 154, 0.4); }
+            50% { box-shadow: 0 10px 40px rgba(107, 76, 154, 0.6); }
+        }
+
+        h2 {
+            color: #ffffff;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+
+        .upload-area {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 35px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .upload-box {
+            flex: 1;
+            min-width: 250px;
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            padding: 30px 20px;
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(107, 76, 154, 0.1), rgba(168, 85, 247, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 14px;
+        }
+
+        .upload-box:hover::before {
+            opacity: 1;
+        }
+
+        .upload-box:hover {
+            border-color: rgba(168, 85, 247, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .upload-box.has-file {
+            border-color: rgba(34, 197, 94, 0.5);
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        .upload-box.has-file::before {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.03));
+            opacity: 1;
+        }
+
+        .file-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .file-label {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .file-desc {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+        }
+
+        .file-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .upload-box:hover .file-btn {
+            background: rgba(168, 85, 247, 0.2);
+            color: #c084fc;
+        }
+
+        .upload-box.has-file .file-btn {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+        }
+
+        .file-name {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            margin-top: 10px;
+            word-break: break-all;
+            min-height: 18px;
+        }
+
+        .btn-process {
+            width: 100%;
+            background: linear-gradient(135deg, #6b4c9a, #a855f7);
+            color: white;
+            padding: 16px 30px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 25px rgba(107, 76, 154, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-process::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-process:hover::before {
+            left: 100%;
+        }
+
+        .btn-process:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(107, 76, 154, 0.5);
+        }
+
+        .btn-process:active {
+            transform: translateY(0);
+        }
+
+        .btn-process:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-process:disabled:hover::before {
+            left: -100%;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-process.loading .spinner {
+            display: block;
+        }
+
+        #resultado {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .result-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            animation: fadeInUp 0.4s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .result-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            animation: fadeInUp 0.4s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 13px;
+            transition: color 0.3s ease;
+        }
+
+        .step.active {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .step-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-num {
+            background: linear-gradient(135deg, #6b4c9a, #a855f7);
+            color: white;
+            box-shadow: 0 4px 12px rgba(107, 76, 154, 0.4);
+        }
+
+        .step.done .step-num {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: white;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+        }
+
+        .step.done {
+            color: #4ade80;
+        }
+
+        .divider {
+            width: 40px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            align-self: center;
+            border-radius: 1px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            .upload-area {
+                flex-direction: column;
+            }
+            .upload-box {
+                min-width: unset;
+            }
+            h2 {
+                font-size: 22px;
+            }
+            .steps {
+                gap: 15px;
+            }
+            .divider {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">📄</div>
+            <h2>Sustituir párrafos entre documentos</h2>
+            <p class="subtitle">Selecciona dos archivos .docx para procesarlos</p>
+        </div>
+
+        <div class="steps">
+            <div class="step active" id="step1">
+                <span class="step-num">1</span>
+                <span>Subir archivos</span>
+            </div>
+            <div class="divider"></div>
+            <div class="step" id="step2">
+                <span class="step-num">2</span>
+                <span>Procesar</span>
+            </div>
+            <div class="divider"></div>
+            <div class="step" id="step3">
+                <span class="step-num">3</span>
+                <span>Descargar</span>
+            </div>
+        </div>
+
+        <div class="upload-area">
+            <div class="upload-box" id="box1">
+                <span class="file-icon">📋</span>
+                <div class="file-label">Documento 1</div>
+                <div class="file-desc">Documento con formato base</div>
+                <div class="file-input-wrapper">
+                    <div class="file-btn">
+                        <span>📎</span> Seleccionar archivo
+                    </div>
+                    <input type="file" id="doc1" accept=".docx" onchange="onFileSelect('doc1', 'box1', 'step1')">
+                </div>
+                <div class="file-name" id="name1"></div>
+            </div>
+
+            <div class="upload-box" id="box2">
+                <span class="file-icon">📊</span>
+                <div class="file-label">Documento 2</div>
+                <div class="file-desc">Documento con datos</div>
+                <div class="file-input-wrapper">
+                    <div class="file-btn">
+                        <span>📎</span> Seleccionar archivo
+                    </div>
+                    <input type="file" id="doc2" accept=".docx" onchange="onFileSelect('doc2', 'box2', 'step1')">
+                </div>
+                <div class="file-name" id="name2"></div>
+            </div>
+        </div>
+
+        <button class="btn-process" id="btnProcess" onclick="procesar()">
+            <span class="spinner"></span>
+            <span class="btn-text">⚡ Procesar documentos</span>
+        </button>
+
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        function onFileSelect(inputId, boxId, stepId) {
+            const input = document.getElementById(inputId);
+            const box = document.getElementById(boxId);
+            const nameEl = document.getElementById(inputId.replace('doc', 'name'));
+
+            if (input.files.length > 0) {
+                box.classList.add('has-file');
+                nameEl.textContent = '✅ ' + input.files[0].name;
+            } else {
+                box.classList.remove('has-file');
+                nameEl.textContent = '';
+            }
+            updateSteps();
+        }
+
+        function updateSteps() {
+            const doc1 = document.getElementById('doc1').files[0];
+            const doc2 = document.getElementById('doc2').files[0];
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+
+            if (doc1 && doc2) {
+                step1.classList.add('done');
+                step1.classList.remove('active');
+                step2.classList.add('active');
+            } else if (doc1 || doc2) {
+                step1.classList.add('active');
+                step1.classList.remove('done');
+                step2.classList.remove('active');
+            } else {
+                step1.classList.add('active');
+                step1.classList.remove('done');
+                step2.classList.remove('active');
+            }
+        }
+
+        async function procesar() {
+            const doc1 = document.getElementById('doc1').files[0];
+            const doc2 = document.getElementById('doc2').files[0];
+            const btn = document.getElementById('btnProcess');
+            const resultado = document.getElementById('resultado');
+
+            if (!doc1 || !doc2) {
+                resultado.innerHTML = '<div class="result-error">⚠️ Por favor, selecciona ambos documentos antes de procesar</div>';
+                return;
+            }
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+            btn.querySelector('.btn-text').textContent = 'Procesando...';
+            resultado.innerHTML = '';
+
+            const formData = new FormData();
+            formData.append('doc1', doc1);
+            formData.append('doc2', doc2);
+
+            try {
+                const response = await fetch('/substituir', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'resultado.docx';
+                    a.click();
+                    URL.revokeObjectURL(url);
+
+                    resultado.innerHTML = '<div class="result-success">✅ Archivo procesado y descargado correctamente</div>';
+
+                    const step2 = document.getElementById('step2');
+                    step2.classList.add('done');
+                    step2.classList.remove('active');
+                    const step3 = document.getElementById('step3');
+                    step3.classList.add('done');
+                    step3.classList.add('active');
+                } else {
+                    throw new Error('Error en el servidor');
+                }
+            } catch (error) {
+                resultado.innerHTML = '<div class="result-error">❌ Error al procesar los documentos. Verifica que el servidor esté activo.</div>';
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+                btn.querySelector('.btn-text').textContent = '⚡ Procesar documentos';
+            }
+        }
+    </script>
+</body>
+</html>
